@@ -1,45 +1,31 @@
 import time
 import wiringpi
-import spidev
-from ClassLCD import LCD, ActivateLCD, DeactivateLCD
+import sys
 
-PINS = {
-    'RST' : 10,
-    'CS' : 13, # CE
-    'DC' : 9, # D/C
-    'DIN' : 16,
-    'SCLK' : 14, # CLK
-    'LED' : 6, # LIGHT
-}
+def pwm_led(pin_pwm, value):
+    wiringpi.softPwmWrite(pin_pwm, value)
+
+pin_pwm = 4
 
 wiringpi.wiringPiSetup()
-wiringpi.wiringPiSPISetupMode(1, 0, 400000, 0) # (channel, port, speed, mode)
-wiringpi.pinMode(PINS['CS'] , 1) # set pin to mode 1 (output)
-ActivateLCD(PINS['CS'])
-lcd_1 = LCD(PINS)
 
-i = 0
+wiringpi.softPwmCreate(pin_pwm, 0, 300)
+
 try:
-    lcd_1.clear()
-    lcd_1.set_backlight(2)
-    
     while True:
-        print (f'Counter:\n{i}')
-        # LCD is activated and deactivated because of SPI
-        # this enabbles other SPI components to communicate with the master
-        ActivateLCD(PINS['CS'])
-        lcd_1.clear() # clear buffer
-        lcd_1.go_to_xy(0, 0) # starting position
-        lcd_1.put_string(f'Counter: Christ is kigngngngngnng\n{i}') # print to buffer
-
-        DeactivateLCD(PINS['CS'])
-        time.sleep(1)
-        i += 1
+        # Increase brightness
+        for i in range(0, 301):
+            pwm_led(pin_pwm, i)
+            time.sleep(0.02)  # Adjust the sleep duration for speed
+        # Decrease brightness
+        for i in range(100, -1, -1):
+            pwm_led(pin_pwm, i)
+            time.sleep(0.02)  # Adjust the sleep duration for speed
+            if i == 0:
+                break  # Break the loop if brightness is reduced to 0
 
 except KeyboardInterrupt:
-    # deactivaten the LCD after code ended
-    lcd_1.clear()
-    lcd_1.refresh()
-    lcd_1.set_backlight(0)
-    DeactivateLCD(PINS['CS'])
-    print("\nProgram terminated")
+    wiringpi.softPwmWrite(pin_pwm, 301)
+    wiringpi.digitalWrite(pin_pwm, 0)  # Turn off the pin explicitly
+    wiringpi.digitalWrite(pin_pwm, 0)
+    print("finito")

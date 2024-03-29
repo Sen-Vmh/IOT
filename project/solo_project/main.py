@@ -35,11 +35,12 @@ def get_value(BMP280_bus, BMP280address):
 while True:
     temp = bmp_sensor.get_temperature()
     lux = get_value(BMP280_bus, BMP280_address)
+    time.sleep(.5)
     print(f"temp = {temp}\nlux = {lux}")
-    requests.post(field2 +str(lux))
-    time.sleep(15)
-    requests.post(field1 +str(temp))
-    time.sleep(15)
+    # requests.post(field2 +str(lux))
+    # time.sleep(1)
+    # requests.post(field1 +str(temp))
+    # time.sleep(1)
     
 
 
